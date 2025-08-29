@@ -7,14 +7,14 @@ load_dotenv()
 
 app = Flask(__name__)
 
-HYPERCASH_API_KEY = os.getenv("pk_b48f62cc1f920cdaaf9c7bea2cf1e0a20edba5f9")
-HYPERCASH_API_SECRET = os.getenv("sk_b4ed44b6073bae4aed687393a6b7baf8e0047746T")
-HYPERCASH_API_URL = "https://api.hypercashbrasil.com.br/api/user/transaction"  # ajuste se necessário
+HYPERCASH_API_KEY = os.getenv("HYPERCASH_API_KEY")
+HYPERCASH_API_SECRET = os.getenv("HYPERCASH_API_SECRET")
+HYPERCASH_API_URL = "https://api.hypercashbrasil.com.br/api/user/transactions"  # ajuste se necessário
 
 headers = {
     "Content-Type": "application/json",
-    "x-api-key": "pk_b48f62cc1f920cdaaf9c7bea2cf1e0a20edba5f9",
-    "x-api-secret": "sk_b4ed44b6073bae4aed687393a6b7baf8e0047746T"
+    "x-api-key": HYPERCASH_API_KEY,
+    "x-api-secret": HYPERCASH_API_SECRET
 }
 
 @app.route("/create-transaction", methods=["POST"])
@@ -36,13 +36,16 @@ def create_transaction():
     }
 
     try:
-        response = requests.post("https://api.hypercashbrasil.com.br/api/user/transactions", json=payload, headers=headers)
+        response = requests.post(HYPERCASH_API_URL, json=payload, headers=headers)
         response.raise_for_status()
         return jsonify(response.json()), 200
     except requests.exceptions.RequestException as e:
         return jsonify({"error": str(e)}), 500
 
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
+
 
