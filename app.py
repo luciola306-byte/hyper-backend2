@@ -7,14 +7,13 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Chave do HyperCash (sandbox ou produção)
+# Chave secreta HyperCash (produção)
 HYPERCASH_API_KEY = os.getenv("HYPERCASH_API_KEY")
 HYPERCASH_API_URL = "https://api.hypercashbrasil.com.br/api/user/transactions"
 
 headers = {
     "Content-Type": "application/json",
     "Authorization": f"Bearer {HYPERCASH_API_KEY}"
-
 }
 
 @app.route("/create-transaction", methods=["POST"])
@@ -23,11 +22,11 @@ def create_transaction():
     if not data:
         return jsonify({"error": "Sem dados enviados"}), 400
 
-    # Monta payload para HyperCash
+    # Payload base para HyperCash
     payload = {
-        "amount": data.get("amount"),  # valor em centavos
+        "amount": data.get("amount"),  # em centavos
         "currency": "BRL",
-        "paymentMethod": data.get("payment_method"),  # PIX, BOLETO, CREDIT_CARD
+        "paymentMethod": data.get("payment_method"),  # "CREDIT_CARD", "PIX", "BOLETO"
         "customer": {
             "name": data.get("customer_name"),
             "email": data.get("customer_email"),
@@ -39,7 +38,7 @@ def create_transaction():
         "order_id": data.get("order_id")
     }
 
-    # Se for cartão de crédito, incluir dados do cartão
+    # Se for cartão, adiciona os dados do cartão
     if data.get("payment_method") == "CREDIT_CARD":
         payload["card"] = {
             "number": data.get("card_number"),
@@ -48,6 +47,10 @@ def create_transaction():
             "expirationYear": data.get("card_exp_year"),
             "cvv": data.get("card_cvv")
         }
+
+    # Para boleto ou PIX, opcionalmente pode adicionar validade
+    if data.get("payment_method") in ["BOLETO", "PIX"]:
+        payload[data.get("payment_method").lower()] = {"expiresInDays": 2}
 
     try:
         response = requests.post(HYPERCASH_API_URL, json=payload, headers=headers)
@@ -63,10 +66,10 @@ def create_transaction():
     except requests.exceptions.RequestException as e:
         return jsonify({"status": "failed", "error": str(e)}), 500
 
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
 
 
 
