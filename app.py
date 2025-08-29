@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 # Chave do HyperCash (sandbox ou produção)
 HYPERCASH_API_KEY = os.getenv("HYPERCASH_API_KEY")
-HYPERCASH_API_URL = "https://sandbox-api.hypercashbrasil.com.br/api/user/transactions"
+HYPERCASH_API_URL = "https://hyper-backend2.onrender.com/create-transaction"
 
 headers = {
     "Content-Type": "application/json",
@@ -66,6 +66,7 @@ def create_transaction():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
